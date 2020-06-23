@@ -56,7 +56,7 @@ if __name__ == '__main__':
 	X, y = make_dataset()
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=2)
 	model = RNN(input_shape=X.shape[1:]).run()
-	hist = model.fit(X_train, y_train, epochs=10, batch_size=30, shuffle='true', validation_data=(X_test, y_test))
+	hist = model.fit(X_train, y_train, epochs=50, batch_size=100, shuffle='true', validation_data=(X_test, y_test))
 	hist_out = open('histories/training_history.pickle', 'wb')
 	pickle.dump(hist.history, hist_out)
 	hist_out.close()
