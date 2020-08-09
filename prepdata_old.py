@@ -6,14 +6,21 @@ from python_speech_features import mfcc
 
 
 class Config:
-	def __init__(self, n_fft, hop_length, n_mfcc):
-		self.n_fft = n_fft
-		self.hop_length = hop_length
-		self.n_mfcc = n_mfcc
+	"""
+	Mel Filterbanks = 26 * 99
+	MFCC = 13 * 99
+
+	Sampling Rate = 22050Hz
+	NFFT = 551 samples
+	"""
+	def __init__(self, nfilt=26, nfeat=13, nfft=551):
+		self.nfilt = nfilt
+		self.nfeat = nfeat
+		self.nfft = nfft
 
 
 if __name__ == '__main__':
-	config = Config(1024, 100, 13)
+	config = Config()
 	X = []
 	y = []
 	df = pd.read_csv('datamaps/datamap.csv')
@@ -22,7 +29,7 @@ if __name__ == '__main__':
 		f = df.iloc[i]['fname']
 		signal, rate = librosa.load('data/'+c+'/'+f)
 		signal = np.pad(signal, (0, rate-len(signal)), 'constant')
-		signal = librosa.feature.mfcc(signal, n_fft=config.n_fft, hop_length=config.hop_length, n_mfcc=config.n_mfcc)
+		signal = mfcc(signal, rate, numcep=config.nfeat, nfilt=config.nfilt, nfft=config.nfft)
 		X.append(signal)
 		y.append(df.iloc[i]['label'])
 
