@@ -20,9 +20,8 @@ def specificity(y_true, y_pred):
 
 def auc():
 	return metrics.AUC(
-    	num_thresholds=300, curve='ROC', summation_method='interpolation', name=None,
-    	dtype=None, thresholds=None, multi_label=False, label_weights=None
-	)
+    	num_thresholds=1024, curve='ROC', summation_method='interpolation', name=None,
+    	dtype=None, thresholds=None, multi_label=False, label_weights=None)
 
 
 class RNN:
