@@ -27,9 +27,9 @@ if __name__ == '__main__':
 		y.append(df.iloc[i]['label'])
 
 	X, y = np.array(X), np.array(y)
-	X_out = open('trainable/X.pickle', 'wb')
+	X_out = open('trainable/X_100.pickle', 'wb')
 	pickle.dump(X, X_out)
-	y_out = open('trainable/y.pickle', 'wb')
+	y_out = open('trainable/y_100.pickle', 'wb')
 	pickle.dump(y, y_out)
 	X_out.close()
 	y_out.close()

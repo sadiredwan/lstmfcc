@@ -1,4 +1,5 @@
 import pickle
+from keras import metrics
 from keras import Sequential
 from keras import backend as K
 from sklearn.model_selection import train_test_split
@@ -17,6 +18,13 @@ def specificity(y_true, y_pred):
 	return true_negatives / (possible_negatives + K.epsilon())
 
 
+def auc():
+	return metrics.AUC(
+    	num_thresholds=300, curve='ROC', summation_method='interpolation', name=None,
+    	dtype=None, thresholds=None, multi_label=False, label_weights=None
+	)
+
+
 class RNN:
 	def __init__(self, input_shape):
 		self.input_shape = input_shape
@@ -33,12 +41,12 @@ class RNN:
 		model.add(Flatten())
 		model.add(Dense(1, activation='sigmoid'))
 		model.summary()
-		model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc', sensitivity, specificity])
+		model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc', sensitivity, specificity, auc()])
 		return model
 
 
 def make_dataset():
-	X_in, y_in = open('trainable/X.pickle', 'rb'), open('trainable/y.pickle', 'rb')
+	X_in, y_in = open('trainable/X_100.pickle', 'rb'), open('trainable/y_100.pickle', 'rb')
 	X, y = pickle.load(X_in), pickle.load(y_in)
 	X_in.close()
 	y_in.close()
