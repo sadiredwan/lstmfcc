@@ -1,10 +1,11 @@
 import pickle
+import seaborn
 import numpy as np
 import tensorflow as tf
 from keras import backend as K
 import matplotlib.pyplot as plt
 from keras.models import load_model
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import roc_curve, auc
 
 
 def sensitivity(y_true, y_pred):
@@ -82,16 +83,31 @@ if __name__ == '__main__':
 	plt.ylabel('AUC')
 	plt.gca().legend(('Training', 'Validation'))
 
-	# f3 = plt.figure(3)
+	f3 = plt.figure(3)
+	plt.style.use('seaborn')
+	plt.subplot(2, 1, 1)
 	model = load_model('models/rnnmodel.h5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity}, compile=True)
-	X_test_in, y_test_in = open('testdata/X_test_100.pickle', 'rb'), open('testdata/X_test_100.pickle', 'rb')
+	X_test_in, y_test_in = open('testdata/X_test_100.pickle', 'rb'), open('testdata/y_test_100.pickle', 'rb')
 	X_test, y_test = pickle.load(X_test_in), pickle.load(y_test_in)
 	X_test_in.close()
 	y_test_in.close()
-	y_pred = model.predict(X_test)
-	print(y_pred.shape)
-	print(y_test.shape)
-	# matrix = tf.math.confusion_matrix(y_test.argmax(axis=1), y_pred.argmax(axis=1))
-	# matrix = matrix/matrix.numpy().sum(axis=1)[:, tf.newaxis]
-	
+	y_pred = np.round(model.predict(X_test))
+	matrix = tf.math.confusion_matrix(y_test, y_pred)
+	matrix = matrix/matrix.numpy().sum(axis=1)[:, tf.newaxis]	
+	seaborn.heatmap(matrix, annot=True)
+	plt.title('Confusion Matrix')
+	plt.xlabel("Predicted")
+	plt.ylabel("True")
+
+	plt.subplot(2, 1, 2)
+	plt.tight_layout(4)
+	fp, tp, thresholds = roc_curve(y_test, y_pred)
+	auc = auc(fp, tp)
+	plt.plot([0, 1], [0, 1], 'k--')
+	plt.plot(fp, tp, label='Area = {:.3f}'.format(auc))
+	plt.xlabel('False positive')
+	plt.ylabel('True positive')
+	plt.title('ROC curve')
+	plt.legend(loc='best')
+
 	plt.show()
