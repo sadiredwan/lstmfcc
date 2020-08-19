@@ -45,7 +45,6 @@ def make_dataset():
 	y_in.close()
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
 	X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5, random_state=2)
-
 	X_test_out = open('testdata/X_test_100.pickle', 'wb')
 	pickle.dump(X_test, X_test_out)
 	y_test_out = open('testdata/y_test_100.pickle', 'wb')

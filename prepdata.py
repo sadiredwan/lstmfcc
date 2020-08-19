@@ -2,7 +2,6 @@ import pickle
 import librosa
 import numpy as np
 import pandas as pd
-from python_speech_features import mfcc
 
 
 class Config:
