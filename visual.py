@@ -104,7 +104,7 @@ if __name__ == '__main__':
 	fp, tp, thresholds = roc_curve(y_test, y_pred)
 	auc = auc(fp, tp)
 	plt.plot([0, 1], [0, 1], 'k--')
-	plt.plot(fp, tp, label='Area = {:.3f}'.format(auc))
+	plt.plot(fp, tp, label='Area={:.3f}'.format(auc))
 	plt.xlabel('False positive')
 	plt.ylabel('True positive')
 	plt.title('ROC curve')
