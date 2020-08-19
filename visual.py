@@ -1,6 +1,22 @@
 import pickle
 import numpy as np
+import tensorflow as tf
+from keras import backend as K
 import matplotlib.pyplot as plt
+from keras.models import load_model
+from sklearn.metrics import confusion_matrix
+
+
+def sensitivity(y_true, y_pred):
+	true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+	possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+	return true_positives / (possible_positives + K.epsilon())
+
+
+def specificity(y_true, y_pred):
+	true_negatives = K.sum(K.round(K.clip((1-y_true) * (1-y_pred), 0, 1)))
+	possible_negatives = K.sum(K.round(K.clip(1-y_true, 0, 1)))
+	return true_negatives / (possible_negatives + K.epsilon())
 
 
 if __name__ == '__main__':
@@ -66,4 +82,16 @@ if __name__ == '__main__':
 	plt.ylabel('AUC')
 	plt.gca().legend(('Training', 'Validation'))
 
+	# f3 = plt.figure(3)
+	model = load_model('models/rnnmodel.h5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity}, compile=True)
+	X_test_in, y_test_in = open('testdata/X_test_100.pickle', 'rb'), open('testdata/X_test_100.pickle', 'rb')
+	X_test, y_test = pickle.load(X_test_in), pickle.load(y_test_in)
+	X_test_in.close()
+	y_test_in.close()
+	y_pred = model.predict(X_test)
+	print(y_pred.shape)
+	print(y_test.shape)
+	# matrix = tf.math.confusion_matrix(y_test.argmax(axis=1), y_pred.argmax(axis=1))
+	# matrix = matrix/matrix.numpy().sum(axis=1)[:, tf.newaxis]
+	
 	plt.show()

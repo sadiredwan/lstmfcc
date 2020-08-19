@@ -18,12 +18,6 @@ def specificity(y_true, y_pred):
 	return true_negatives / (possible_negatives + K.epsilon())
 
 
-def auc():
-	return metrics.AUC(
-    	num_thresholds=1024, curve='ROC', summation_method='interpolation', name=None,
-    	dtype=None, thresholds=None, multi_label=False, label_weights=None)
-
-
 class RNN:
 	def __init__(self, input_shape):
 		self.input_shape = input_shape
@@ -40,7 +34,7 @@ class RNN:
 		model.add(Flatten())
 		model.add(Dense(1, activation='sigmoid'))
 		model.summary()
-		model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc', sensitivity, specificity, auc()])
+		model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc', sensitivity, specificity, metrics.AUC()])
 		return model
 
 
@@ -49,14 +43,23 @@ def make_dataset():
 	X, y = pickle.load(X_in), pickle.load(y_in)
 	X_in.close()
 	y_in.close()
-	return X, y
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
+	X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5, random_state=2)
+
+	X_test_out = open('testdata/X_test_100.pickle', 'wb')
+	pickle.dump(X_test, X_test_out)
+	y_test_out = open('testdata/y_test_100.pickle', 'wb')
+	pickle.dump(y_test, y_test_out)
+	X_test_out.close()
+	y_test_out.close()
+	return X_train, X_val, y_train, y_val
 
 
 if __name__ == '__main__':
-	X, y = make_dataset()
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=2)
-	model = RNN(input_shape=X.shape[1:]).run()
-	hist = model.fit(X_train, y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_test, y_test))
+	X_train, X_val, y_train, y_val = make_dataset()
+	model = RNN(input_shape=X_train.shape[1:]).run()
+	hist = model.fit(X_train, y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
 	hist_out = open('histories/training_history_100.pickle', 'wb')
 	pickle.dump(hist.history, hist_out)
 	hist_out.close()
+	model.save('models/rnnmodel.h5')
