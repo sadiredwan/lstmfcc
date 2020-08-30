@@ -88,7 +88,7 @@ if __name__ == '__main__':
 	tuner.search(x=X_train, y=y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
 	model = RNN(input_shape=X_train.shape[1:], hyperparams=tuner.get_best_hyperparameters()[0].values).run()
 	hist = model.fit(X_train, y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
-	hist_out = open('histories/training_history_100.pickle', 'wb')
+	hist_out = open('histories/training_history_01.pickle', 'wb')
 	pickle.dump(hist.history, hist_out)
 	hist_out.close()
 	model.save('models/rnnmodel_01.h5')
