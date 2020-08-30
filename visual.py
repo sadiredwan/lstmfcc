@@ -32,8 +32,6 @@ if __name__ == '__main__':
 	val_sensitivity = np.array(history['val_sensitivity'])
 	train_specificity = np.array(history['specificity'])
 	val_specificity = np.array(history['val_specificity'])
-	train_auc = np.array(history['auc'])
-	val_auc = np.array(history['val_auc'])
 	epochs = np.arange(1, train_acc.shape[0]+1)
 
 	f1 = plt.figure(1)
@@ -57,7 +55,7 @@ if __name__ == '__main__':
 
 	f2 = plt.figure(2)
 	plt.style.use('seaborn')
-	plt.subplot(3, 1, 1)
+	plt.subplot(2, 1, 1)
 	plt.plot(epochs, train_sensitivity)
 	plt.plot(epochs, val_sensitivity)
 	plt.title('Sensitivity Curve')
@@ -65,22 +63,13 @@ if __name__ == '__main__':
 	plt.ylabel('Sensitivity')
 	plt.gca().legend(('Training', 'Validation'))
 
-	plt.subplot(3, 1, 2)
-	plt.tight_layout(0)
+	plt.subplot(2, 1, 2)
+	plt.tight_layout(4)
 	plt.plot(epochs, train_specificity)
 	plt.plot(epochs, val_specificity)
 	plt.title('Specificity Curve')
 	plt.xlabel('Epochs')
 	plt.ylabel('Specificity')
-	plt.gca().legend(('Training', 'Validation'))
-
-	plt.subplot(3, 1, 3)
-	plt.tight_layout(0)
-	plt.plot(epochs, train_auc)
-	plt.plot(epochs, val_auc)
-	plt.title('AUC Curve')
-	plt.xlabel('Epochs')
-	plt.ylabel('AUC')
 	plt.gca().legend(('Training', 'Validation'))
 
 	f3 = plt.figure(3)

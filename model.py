@@ -1,5 +1,4 @@
 import pickle
-from keras import metrics
 from keras import Sequential
 from keras import backend as K
 from sklearn.model_selection import train_test_split
@@ -34,7 +33,7 @@ class RNN:
 		model.add(Flatten())
 		model.add(Dense(1, activation='sigmoid'))
 		model.summary()
-		model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc', sensitivity, specificity, metrics.AUC()])
+		model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc', sensitivity, specificity])
 		return model
 
 
