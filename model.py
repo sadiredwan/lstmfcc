@@ -66,15 +66,15 @@ class RNN:
 
 
 def make_dataset():
-	X_in, y_in = open('trainable/X_100.pickle', 'rb'), open('trainable/y_100.pickle', 'rb')
+	X_in, y_in = open('trainable/X_01.pickle', 'rb'), open('trainable/y_01.pickle', 'rb')
 	X, y = pickle.load(X_in), pickle.load(y_in)
 	X_in.close()
 	y_in.close()
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
 	X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5, random_state=2)
-	X_test_out = open('testdata/X_test_100.pickle', 'wb')
+	X_test_out = open('testdata/X_test_01.pickle', 'wb')
 	pickle.dump(X_test, X_test_out)
-	y_test_out = open('testdata/y_test_100.pickle', 'wb')
+	y_test_out = open('testdata/y_test_01.pickle', 'wb')
 	pickle.dump(y_test, y_test_out)
 	X_test_out.close()
 	y_test_out.close()
@@ -86,10 +86,9 @@ if __name__ == '__main__':
 	LOG_DIR = 'log/'+f'{int(time.time())}'
 	tuner = RandomSearch(trial, objective='val_acc', max_trials=1, executions_per_trial=1, directory=LOG_DIR)
 	tuner.search(x=X_train, y=y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
-
 	model = RNN(input_shape=X_train.shape[1:], hyperparams=tuner.get_best_hyperparameters()[0].values).run()
 	hist = model.fit(X_train, y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
 	hist_out = open('histories/training_history_100.pickle', 'wb')
 	pickle.dump(hist.history, hist_out)
 	hist_out.close()
-	model.save('models/rnnmodel.h5')
+	model.save('models/rnnmodel_01.h5')

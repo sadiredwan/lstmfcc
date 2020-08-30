@@ -2,17 +2,26 @@ import pickle
 import librosa
 import numpy as np
 import pandas as pd
+from python_speech_features import mfcc
 
 
 class Config:
-	def __init__(self, n_fft, hop_length, n_mfcc):
-		self.n_fft = n_fft
-		self.hop_length = hop_length
-		self.n_mfcc = n_mfcc
+	def __init__(self, samplerate, winlen, winstep, numcep, nfilt, nfft):
+		self.samplerate = samplerate
+		self.winlen = winlen
+		self.winstep = winstep
+		self.numcep = numcep
+		self.nfilt = nfilt
+		self.nfft = nfft
+		self.lowfreq = 0
+		self.highfreq = None
+		self.preemph = 0.97
+		self.ceplifter = 22
+		self.appendEnergy = True
 
 
 if __name__ == '__main__':
-	config = Config(1024, 100, 13)
+	config = Config(22050, 0.02, 0.01, 13, 26, 512)
 	X = []
 	y = []
 	df = pd.read_csv('datamaps/datamap.csv')
@@ -21,14 +30,20 @@ if __name__ == '__main__':
 		f = df.iloc[i]['fname']
 		signal, rate = librosa.load('data/'+c+'/'+f)
 		signal = np.pad(signal, (0, rate-len(signal)), 'constant')
-		signal = librosa.feature.mfcc(signal, n_fft=config.n_fft, hop_length=config.hop_length, n_mfcc=config.n_mfcc)
+		signal = mfcc(signal,
+			samplerate=config.samplerate,
+			winlen=config.winlen,
+			winstep=config.winstep,
+			numcep=config.numcep,
+			nfilt=config.nfilt,
+			nfft=config.nfft)
 		X.append(signal)
 		y.append(df.iloc[i]['label'])
 
 	X, y = np.array(X), np.array(y)
-	X_out = open('trainable/X_100.pickle', 'wb')
+	X_out = open('trainable/X_02.pickle', 'wb')
 	pickle.dump(X, X_out)
-	y_out = open('trainable/y_100.pickle', 'wb')
+	y_out = open('trainable/y_02.pickle', 'wb')
 	pickle.dump(y, y_out)
 	X_out.close()
 	y_out.close()
