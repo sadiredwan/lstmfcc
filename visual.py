@@ -20,7 +20,7 @@ def specificity(y_true, y_pred):
 
 
 if __name__ == '__main__':
-	hist_in = open('histories/training_history_01.pickle', 'rb')
+	hist_in = open('histories/training_history_05.pickle', 'rb')
 	history = pickle.load(hist_in)
 	hist_in.close()
 	train_loss = np.array(history['loss'])
@@ -74,8 +74,8 @@ if __name__ == '__main__':
 	f3 = pl.figure(3)
 	pl.style.use('seaborn')
 	pl.subplot(2, 1, 1)
-	model = load_model('models/rnnmodel_01.h5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity}, compile=True)
-	X_test_in, y_test_in = open('testdata/X_test_01.pickle', 'rb'), open('testdata/y_test_01.pickle', 'rb')
+	model = load_model('models/rnnmodel_05.h5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity}, compile=True)
+	X_test_in, y_test_in = open('testdata/X_test_05.pickle', 'rb'), open('testdata/y_test_05.pickle', 'rb')
 	X_test, y_test = pickle.load(X_test_in), pickle.load(y_test_in)
 	X_test_in.close()
 	y_test_in.close()
