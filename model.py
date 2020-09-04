@@ -66,15 +66,15 @@ class RNN:
 
 
 def make_dataset():
-	X_in, y_in = open('trainable/X_05.pickle', 'rb'), open('trainable/y_05.pickle', 'rb')
+	X_in, y_in = open('trainable/X_10.pickle', 'rb'), open('trainable/y_10.pickle', 'rb')
 	X, y = pickle.load(X_in), pickle.load(y_in)
 	X_in.close()
 	y_in.close()
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
 	X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5, random_state=2)
-	X_test_out = open('testdata/X_test_05.pickle', 'wb')
+	X_test_out = open('testdata/X_test_10.pickle', 'wb')
 	pickle.dump(X_test, X_test_out)
-	y_test_out = open('testdata/y_test_05.pickle', 'wb')
+	y_test_out = open('testdata/y_test_10.pickle', 'wb')
 	pickle.dump(y_test, y_test_out)
 	X_test_out.close()
 	y_test_out.close()
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 	tuner.search(x=X_train, y=y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
 	model = RNN(input_shape=X_train.shape[1:], hyperparams=tuner.get_best_hyperparameters()[0].values).run()
 	hist = model.fit(X_train, y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
-	hist_out = open('histories/training_history_05.pickle', 'wb')
+	hist_out = open('histories/training_history_10.pickle', 'wb')
 	pickle.dump(hist.history, hist_out)
 	hist_out.close()
-	model.save('models/rnnmodel_05.h5')
+	model.save('models/rnnmodel_10.h5')
