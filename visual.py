@@ -11,7 +11,7 @@ def autolabel(rects):
 		ax.annotate('{:.4f}'.format(height),
 			xy=(rect.get_x()+rect.get_width()/2, height),
 			xytext=(0, 3),
-			textcoords="offset points",
+			textcoords='offset points',
 			ha='center', va='bottom')
 
 
