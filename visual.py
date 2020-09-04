@@ -9,7 +9,7 @@ def autolabel(rects):
 	for rect in rects:
 		height = rect.get_height()
 		ax.annotate('{:.4f}'.format(height),
-			xy=(rect.get_x() + rect.get_width() / 2, height),
+			xy=(rect.get_x()+rect.get_width()/2, height),
 			xytext=(0, 3),
 			textcoords="offset points",
 			ha='center', va='bottom')
