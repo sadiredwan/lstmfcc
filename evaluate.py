@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	'55ms', '60ms', '65ms', '70ms', '75ms', '80ms', '85ms', '90ms', '95ms', '100ms']
 	list_nfft = [128, 512, 512, 512, 1024, 1024, 1024, 1024, 1024,
 	2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 4096, 4096]
-	evalres = {'winlen':list_winlen, 'nfft':list_nfft, 'precision':[], 'roc_score':[]}
+	evalres = {'winlen':list_winlen, 'nfft':list_nfft, 'precision':[], 'auc_score':[]}
 	PATH = os.getcwd()
 	model_path = PATH + '/models'
 	model_list = os.listdir(model_path)
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 		y_pred = np.round(model.predict(X_test))
 		evalres['precision'].append(precision_score(y_test, y_pred))
 		fp, tp, thresholds = roc_curve(y_test, y_pred)
-		evalres['roc_score'].append(auc(fp, tp))
+		evalres['auc_score'].append(auc(fp, tp))
 
 	evalres_out = open('evalresults/evalres.pickle', 'wb')
 	pickle.dump(evalres, evalres_out)

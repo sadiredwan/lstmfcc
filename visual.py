@@ -101,8 +101,8 @@ if __name__ == '__main__':
 	f4, ax = pl.subplots(figsize=(16, 9))
 	ax.set_ylim([.9, 1])
 	ax.set_xlabel('winlen')
-	ax.set_ylabel('ROC Score')
-	autolabel(ax.bar(evalres['winlen'], evalres['roc_score']))
+	ax.set_ylabel('AUC Score')
+	autolabel(ax.bar(evalres['winlen'], evalres['auc_score']))
 	ax.legend(handles=patch_handle())
 
 	pl.show()
