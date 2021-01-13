@@ -21,7 +21,7 @@ class Config:
 
 
 if __name__ == '__main__':
-	config = Config(22050, 0.1, 0.01, 13, 26, 4096)
+	config = Config(22050, 0.02, 0.01, 13, 26, 512)
 	X = []
 	y = []
 	df = pd.read_csv('datamaps/datamap.csv')
@@ -39,11 +39,12 @@ if __name__ == '__main__':
 			nfft=config.nfft)
 		X.append(signal)
 		y.append(df.iloc[i]['label'])
+		print('write complete - ' + f)
 
 	X, y = np.array(X), np.array(y)
-	X_out = open('trainable/X_10.pickle', 'wb')
+	X_out = open('trainable/X_02.pickle', 'wb')
 	pickle.dump(X, X_out)
-	y_out = open('trainable/y_10.pickle', 'wb')
+	y_out = open('trainable/y_02.pickle', 'wb')
 	pickle.dump(y, y_out)
 	X_out.close()
 	y_out.close()

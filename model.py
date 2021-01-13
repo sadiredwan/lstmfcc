@@ -1,5 +1,8 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import time
 import pickle
+import numpy as np
 from keras import Sequential
 from keras import backend as K
 from kerastuner.tuners import RandomSearch
@@ -31,14 +34,18 @@ def trial(hp):
 	model.add(TimeDistributed(Dense(hp.Int('tdd_3', min_value=16, max_value=128, step=16), activation='relu')))
 	model.add(TimeDistributed(Dense(hp.Int('tdd_4', min_value=16, max_value=128, step=16), activation='relu')))
 	model.add(Flatten())
-	model.add(Dense(1, activation='sigmoid'))
-	model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
+	model.add(Dense(n_classes, activation='softmax'))
+	model.compile(
+		loss='sparse_categorical_crossentropy',
+		optimizer='adam',
+		metrics=['acc'])
 	return model
 
 
 class RNN:
-	def __init__(self, input_shape, hyperparams):
+	def __init__(self, input_shape, output_shape, hyperparams):
 		self.input_shape = input_shape
+		self.output_shape = output_shape
 		self.lstm_1 = hyperparams['lstm_1']
 		self.lstm_2 = hyperparams['lstm_2']
 		self.lstm_3 = hyperparams['lstm_3']
@@ -59,22 +66,25 @@ class RNN:
 		model.add(TimeDistributed(Dense(self.tdd_3, activation='relu')))
 		model.add(TimeDistributed(Dense(self.tdd_4, activation='relu')))
 		model.add(Flatten())
-		model.add(Dense(1, activation='sigmoid'))
+		model.add(Dense(self.output_shape, activation='softmax'))
 		model.summary()
-		model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc', sensitivity, specificity])
+		model.compile(
+			loss='sparse_categorical_crossentropy',
+			optimizer='adam',
+			metrics=['acc', sensitivity, specificity])
 		return model
 
 
 def make_dataset():
-	X_in, y_in = open('trainable/X_10.pickle', 'rb'), open('trainable/y_10.pickle', 'rb')
+	X_in, y_in = open('trainable/X_02.pickle', 'rb'), open('trainable/y_02.pickle', 'rb')
 	X, y = pickle.load(X_in), pickle.load(y_in)
 	X_in.close()
 	y_in.close()
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
 	X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5, random_state=2)
-	X_test_out = open('testdata/X_test_10.pickle', 'wb')
+	X_test_out = open('testdata/X_test_02.pickle', 'wb')
 	pickle.dump(X_test, X_test_out)
-	y_test_out = open('testdata/y_test_10.pickle', 'wb')
+	y_test_out = open('testdata/y_test_02.pickle', 'wb')
 	pickle.dump(y_test, y_test_out)
 	X_test_out.close()
 	y_test_out.close()
@@ -82,13 +92,41 @@ def make_dataset():
 
 
 if __name__ == '__main__':
+
 	X_train, X_val, y_train, y_val = make_dataset()
+	n_classes = len(np.unique(y_train));
+	
 	LOG_DIR = 'log/'+f'{int(time.time())}'
-	tuner = RandomSearch(trial, objective='val_acc', max_trials=1, executions_per_trial=1, directory=LOG_DIR)
-	tuner.search(x=X_train, y=y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
-	model = RNN(input_shape=X_train.shape[1:], hyperparams=tuner.get_best_hyperparameters()[0].values).run()
-	hist = model.fit(X_train, y_train, epochs=100, batch_size=50, shuffle='true', validation_data=(X_val, y_val))
-	hist_out = open('histories/training_history_10.pickle', 'wb')
+	
+	tuner = RandomSearch(trial,
+		objective='val_acc',
+		max_trials=1,
+		executions_per_trial=1,
+		directory=LOG_DIR)
+	
+	tuner.search(
+		x=X_train,
+		y=y_train,
+		epochs=100,
+		batch_size=50,
+		shuffle='true',
+		validation_data=(X_val, y_val))
+	
+	model = RNN(
+		input_shape=X_train.shape[1:],
+		output_shape = n_classes,
+		hyperparams=tuner.get_best_hyperparameters()[0].values).run()
+
+	hist = model.fit(
+		X_train,
+		y_train,
+		epochs=100,
+		batch_size=50,
+		shuffle='true',
+		validation_data=(X_val, y_val))
+	
+	hist_out = open('histories/training_history_02.pickle', 'wb')
+	
 	pickle.dump(hist.history, hist_out)
 	hist_out.close()
-	model.save('models/rnnmodel_10.h5')
+	model.save('models/rnnmodel_multiclass_winlen02.h5')

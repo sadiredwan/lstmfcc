@@ -1,10 +1,16 @@
 **/.idea/
+histories.old/
 histories/
 data/
 nfreduced/
-datamaps/
+trainable.old/
+trainable.old/
 trainable/
+models.old/
 models/
+testdata.old/
 testdata/
 log/
+evalresults.old/
 evalresults/
+plot.py
