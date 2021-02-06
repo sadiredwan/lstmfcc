@@ -76,25 +76,19 @@ class RNN:
 
 
 def make_dataset():
-	X_in, y_in = open('trainable/X_02.pickle', 'rb'), open('trainable/y_02.pickle', 'rb')
-	X, y = pickle.load(X_in), pickle.load(y_in)
-	X_in.close()
-	y_in.close()
+	X, y = pickle.load(open('trainable/X_02.pickle', 'rb')), pickle.load(open('trainable/y_02.pickle', 'rb'))
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
 	X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5, random_state=2)
-	X_test_out = open('testdata/X_test_02.pickle', 'wb')
-	pickle.dump(X_test, X_test_out)
-	y_test_out = open('testdata/y_test_02.pickle', 'wb')
-	pickle.dump(y_test, y_test_out)
-	X_test_out.close()
-	y_test_out.close()
+	pickle.dump(X_test, open('testdata/X_test_02.pickle', 'wb'))
+	pickle.dump(y_test, open('testdata/y_test_02.pickle', 'wb'))
+
 	return X_train, X_val, y_train, y_val
 
 
 if __name__ == '__main__':
 
 	X_train, X_val, y_train, y_val = make_dataset()
-	n_classes = len(np.unique(y_train));
+	n_classes = len(np.unique(y_train))
 	
 	LOG_DIR = 'log/'+f'{int(time.time())}'
 	
@@ -124,9 +118,6 @@ if __name__ == '__main__':
 		batch_size=50,
 		shuffle='true',
 		validation_data=(X_val, y_val))
-	
-	hist_out = open('histories/training_history_02.pickle', 'wb')
-	
-	pickle.dump(hist.history, hist_out)
-	hist_out.close()
+
+	pickle.dump(hist.history, open('histories/training_history_02.pickle', 'wb'))
 	model.save('models/rnnmodel_multiclass_winlen02.h5')
