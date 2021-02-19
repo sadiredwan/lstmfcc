@@ -1,4 +1,5 @@
 import os
+import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import time
 import pickle
@@ -11,21 +12,10 @@ from kerastuner.engine.hyperparameters import HyperParameters
 from keras.layers import LSTM, Dropout, TimeDistributed, Dense, Flatten
 
 
-def sensitivity(y_true, y_pred):
-	true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-	possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-	return true_positives / (possible_positives + K.epsilon())
-
-
-def specificity(y_true, y_pred):
-	true_negatives = K.sum(K.round(K.clip((1-y_true) * (1-y_pred), 0, 1)))
-	possible_negatives = K.sum(K.round(K.clip(1-y_true, 0, 1)))
-	return true_negatives / (possible_negatives + K.epsilon())
-
-
 def trial(hp):
 	model = Sequential()
-	model.add(LSTM(hp.Int('lstm_1', min_value=32, max_value=256, step=32), return_sequences=True, input_shape=X_train.shape[1:]))
+	model.add(TimeDistributed(Flatten(input_shape=X_train.shape[1:])))
+	model.add(LSTM(hp.Int('lstm_1', min_value=32, max_value=256, step=32), return_sequences=True))
 	model.add(LSTM(hp.Int('lstm_2', min_value=32, max_value=256, step=32), return_sequences=True))
 	model.add(LSTM(hp.Int('lstm_3', min_value=32, max_value=256, step=32), return_sequences=True))
 	model.add(LSTM(hp.Int('lstm_4', min_value=32, max_value=256, step=32), return_sequences=True))
@@ -57,7 +47,8 @@ class RNN:
 	
 	def run(self):
 		model = Sequential()
-		model.add(LSTM(self.lstm_1, return_sequences=True, input_shape=self.input_shape))
+		model.add(TimeDistributed(Flatten(input_shape=self.input_shape)))
+		model.add(LSTM(self.lstm_1, return_sequences=True))
 		model.add(LSTM(self.lstm_2, return_sequences=True))
 		model.add(LSTM(self.lstm_3, return_sequences=True))
 		model.add(LSTM(self.lstm_4, return_sequences=True))
@@ -67,37 +58,37 @@ class RNN:
 		model.add(TimeDistributed(Dense(self.tdd_4, activation='relu')))
 		model.add(Flatten())
 		model.add(Dense(self.output_shape, activation='softmax'))
-		model.summary()
 		model.compile(
 			loss='sparse_categorical_crossentropy',
 			optimizer='adam',
-			metrics=['acc', sensitivity, specificity])
+			metrics=['acc'])
 		return model
 
 
 def make_dataset():
-	X, y = pickle.load(open('trainable/X_02.pickle', 'rb')), pickle.load(open('trainable/y_02.pickle', 'rb'))
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
+	dataset = sys.argv[1]
+	X, y = pickle.load(open('trainable/X_'+dataset+'.pickle', 'rb')), pickle.load(open('trainable/y_'+dataset+'.pickle', 'rb'))
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=2)
 	X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5, random_state=2)
-	pickle.dump(X_test, open('testdata/X_test_02.pickle', 'wb'))
-	pickle.dump(y_test, open('testdata/y_test_02.pickle', 'wb'))
+	pickle.dump(X_test, open('testdata/X_'+dataset+'.pickle', 'wb'))
+	pickle.dump(y_test, open('testdata/y_'+dataset+'.pickle', 'wb'))
 
 	return X_train, X_val, y_train, y_val
 
 
 if __name__ == '__main__':
-
 	X_train, X_val, y_train, y_val = make_dataset()
 	n_classes = len(np.unique(y_train))
-	
+ 	
 	LOG_DIR = 'log/'+f'{int(time.time())}'
-	
-	tuner = RandomSearch(trial,
+ 	
+	tuner = RandomSearch(
+		trial,
 		objective='val_acc',
 		max_trials=1,
 		executions_per_trial=1,
 		directory=LOG_DIR)
-	
+ 	
 	tuner.search(
 		x=X_train,
 		y=y_train,
@@ -105,7 +96,7 @@ if __name__ == '__main__':
 		batch_size=50,
 		shuffle='true',
 		validation_data=(X_val, y_val))
-	
+ 	
 	model = RNN(
 		input_shape=X_train.shape[1:],
 		output_shape = n_classes,
@@ -119,5 +110,7 @@ if __name__ == '__main__':
 		shuffle='true',
 		validation_data=(X_val, y_val))
 
-	pickle.dump(hist.history, open('histories/training_history_02.pickle', 'wb'))
-	model.save('models/rnnmodel_multiclass_winlen02.h5')
+	model.summary()
+ 	
+	pickle.dump(hist.history, open('histories/training_history_'+sys.argv[1]+'.pickle', 'wb'))
+	model.save('models/model_winlen_'+sys.argv[1]+'.h5')
